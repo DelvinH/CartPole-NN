@@ -1,19 +1,28 @@
-
+from DQNAgent import DQNAgent
 import gym
 
 
-env = gym.make('CartPole-v0')
-env.reset()
-for i_episode in range(20):
-    observation = env.reset()
-    for t in range(100):
+env_name = "CartPole-v1"
+env = gym.make(env_name)
+print("Observation space: ", env.observation_space)
+print("Action space: ", env.action_space)
+
+agent = DQNAgent(env)
+state = env.reset()
+
+num_eps = 2000
+
+for ep in range(num_eps):
+    state = env.reset()
+    done = False
+    total_reward = 0
+
+    while not done:
+        action = agent.get_action(state)
+        next_state, reward, done, info = env.step(action)
+        agent.train(state, action, next_state, reward, done)
         env.render()
-        #print(observation)
-        action = env.action_space.sample() # 1 moves right, two moves left
-        print(action)
-        observation, reward, done, info = env.step(action)
-        #print(done)
-        if done:
-            print("Episode finished after {} timesteps".format(t+1))
-            break
-env.close()
+        total_reward += reward
+        state = next_state
+
+    print("Episode: {}, total_reward: {:.2f}".format(ep, total_reward))
